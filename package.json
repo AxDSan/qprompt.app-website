@@ -1,0 +1,29 @@
+{
+  "name": "qprompt.app-website",
+  "version": "1.0.0",
+  "description": "QPrompt's Website",
+  "keywords": [
+    "qprompt",
+    "teleprompter",
+    "autocue",
+    "website",
+    "cue",
+    "cuperino"
+  ],
+  "homepage": "https://github.com/Cuperino/qprompt.app-website#readme",
+  "bugs": {
+    "url": "https://github.com/Cuperino/qprompt.app-website/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cuperino/qprompt.app-website.git"
+  },
+  "license": "ISC",
+  "author": "Javier O. Cordero Pérez",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "run": "main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
