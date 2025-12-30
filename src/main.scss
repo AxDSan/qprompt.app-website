@@ -96,14 +96,21 @@ $btn-border-radius-lg: 50rem;
     /* Start completely hidden */
     opacity: 0;
     pointer-events: none;
+    
+    /* Ensure it scales from top-left to match the background prompter */
+    transform-origin: top left !important;
 }
 
 /* The reveal mask - clips content vertically from center */
 #prompter-tv-wrapper .tv-reveal-mask {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    border-radius: 0.5rem;
+    /* Removed border-radius here to avoid double-clipping offsets */
+    
     /* Start as thin horizontal line at center */
     clip-path: inset(50% 0 50% 0);
 }
@@ -281,7 +288,7 @@ $btn-border-radius-lg: 50rem;
     pointer-events: none;
 }
 
-/* The WASM app container - inside the reveal mask */
+/* Target the Qt WASM shadow container specifically to ensure it fills its parent */
 #qt-shadow-container,
 [id*="qt-shadow-container"] { 
     opacity: 0.85 !important;
@@ -294,6 +301,25 @@ $btn-border-radius-lg: 50rem;
         inset 0 0 30px rgba(0, 0, 0, 0.3),
         0 0 20px rgba(35, 187, 132, 0.15),
         0 0 40px rgba(58, 156, 210, 0.1);
+    
+    /* Ensure it fills its parent exactly */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+}
+
+/* Target the Qt WASM canvas specifically */
+#qt-window-canvas {
+    transform-origin: top left !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
 }
 
 /* Before WASM is loaded, hide it */

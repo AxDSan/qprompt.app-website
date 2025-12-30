@@ -24,7 +24,7 @@ const mimeTypes = {
   '.wasm': 'application/wasm'
 };
 
-const publicDir = path.resolve(__dirname, process.env.PUBLIC_DIR || 'public');
+const publicDir = path.resolve(__dirname, process.env.PUBLIC_DIR || 'dist');
 
 const requestListener = function (req, res) {
   // Normalize the request path
