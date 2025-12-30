@@ -153,120 +153,16 @@ $btn-border-radius-lg: 50rem;
     opacity: 0;
     z-index: 50;
     pointer-events: none;
+    transform-origin: center;
     background: radial-gradient(
-        ellipse 100% 0% at 50% 50%,
+        ellipse 100% 100% at 50% 50%,
         rgba(35, 187, 132, 0.3) 0%,
         rgba(58, 156, 210, 0.2) 40%,
         transparent 70%
     );
 }
 
-/* ===== ANIMATION STATES ===== */
-
-/* Phase 1: Scanline appears (tv-on class added) */
-#prompter-tv-wrapper.tv-on {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-#prompter-tv-wrapper.tv-on .tv-scanline {
-    animation: scanline-appear 0.4s ease-out forwards;
-}
-
-@keyframes scanline-appear {
-    0% {
-        opacity: 0;
-        transform: translateY(-50%) scaleX(0);
-    }
-    50% {
-        opacity: 1;
-        transform: translateY(-50%) scaleX(0.6);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(-50%) scaleX(1);
-    }
-}
-
-/* Phase 2: Vertical reveal (tv-reveal class added after scanline) */
-#prompter-tv-wrapper.tv-reveal .tv-reveal-mask {
-    animation: vertical-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-#prompter-tv-wrapper.tv-reveal .tv-scanline {
-    animation: scanline-fade 0.8s ease-out 0.2s forwards;
-}
-
-#prompter-tv-wrapper.tv-reveal .tv-glow {
-    animation: glow-expand 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Vertical reveal - expands from center line to full height */
-@keyframes vertical-reveal {
-    0% {
-        clip-path: inset(50% 0 50% 0);
-        filter: brightness(2.5) saturate(0);
-    }
-    100% {
-        clip-path: inset(0% 0 0% 0);
-        filter: brightness(1) saturate(1);
-    }
-}
-
-/* Scanline fades as reveal completes */
-@keyframes scanline-fade {
-    0% {
-        opacity: 1;
-        height: 4px;
-        box-shadow: 
-            0 0 10px 2px rgba(255, 255, 255, 0.8),
-            0 0 30px 8px rgba(35, 187, 132, 0.6),
-            0 0 60px 15px rgba(58, 156, 210, 0.4);
-    }
-    30% {
-        opacity: 0.8;
-        height: 8px;
-    }
-    100% {
-        opacity: 0;
-        height: 0px;
-        box-shadow: none;
-    }
-}
-
-/* Glow expands vertically with the reveal */
-@keyframes glow-expand {
-    0% {
-        opacity: 1;
-        background: radial-gradient(
-            ellipse 100% 5% at 50% 50%,
-            rgba(255, 255, 255, 0.4) 0%,
-            rgba(35, 187, 132, 0.3) 30%,
-            transparent 60%
-        );
-    }
-    30% {
-        opacity: 0.8;
-        background: radial-gradient(
-            ellipse 100% 30% at 50% 50%,
-            rgba(35, 187, 132, 0.2) 0%,
-            rgba(58, 156, 210, 0.15) 50%,
-            transparent 80%
-        );
-    }
-    60% {
-        opacity: 0.5;
-        background: radial-gradient(
-            ellipse 100% 60% at 50% 50%,
-            rgba(35, 187, 132, 0.1) 0%,
-            transparent 70%
-        );
-    }
-    100% {
-        opacity: 0;
-        background: transparent;
-    }
-}
+/* ===== ANIMATION STATES (Now handled by Motion One Timeline) ===== */
 
 /* Final state - clean revealed app */
 #prompter-tv-wrapper.tv-complete .tv-reveal-mask {
@@ -292,9 +188,9 @@ $btn-border-radius-lg: 50rem;
 }
 
 /* Target the Qt WASM shadow container specifically to ensure it fills its parent */
-#qt-shadow-container,
-[id*="qt-shadow-container"] { 
-    opacity: 0.85 !important;
+#qt-shadow-container, 
+[id*="qt-shadow-container"] {
+    opacity: 0;
     visibility: visible !important;
     pointer-events: auto !important;
     border-radius: 0.5rem;
@@ -313,6 +209,12 @@ $btn-border-radius-lg: 50rem;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#prompter-tv-wrapper.tv-on #qt-shadow-container,
+#prompter-tv-wrapper.tv-on [id*="qt-shadow-container"] {
+    opacity: 0.85;
 }
 
 /* Target the Qt WASM canvas specifically */
@@ -328,13 +230,6 @@ $btn-border-radius-lg: 50rem;
     padding: 0 !important;
     display: block !important;
     outline: none !important;
-}
-
-/* Before WASM is loaded, hide it */
-#prompter-tv-wrapper:not(.tv-on) #qt-shadow-container,
-#prompter-tv-wrapper:not(.tv-on) [id*="qt-shadow-container"] {
-    opacity: 0 !important;
-    visibility: hidden !important;
 }
 
 /* Hide old tabs initially */
