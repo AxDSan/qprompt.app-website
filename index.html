@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link href="css/fontawesome.min.css" rel="stylesheet">
-    <link href="css/tailwind.css" rel="stylesheet">
+    <link href="/css/fontawesome.min.css" rel="stylesheet">
+    <link href="/src/input.css" rel="stylesheet">
     
     <!-- Motion -->
     <script src="https://cdn.jsdelivr.net/npm/motion@10.16.2/dist/motion.js"></script>
@@ -48,20 +48,118 @@
             width: 100vw;
             height: calc(100vh - 130px);
         }
-        #placeholder-prompter { opacity: 0.75; }
-        /* Improved hiding for the dynamic prompter container */
-        #screen > #qt-shadow-container,
-        #screen > [id^="qt-shadow-container"] { 
-            opacity: 0 !important; 
-            visibility: hidden;
+        
+        /* ===== TV TURN-ON EFFECT ===== */
+        /* Container for the TV effect - clips the content during animation */
+        #prompter-tv-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            /* Start as a thin horizontal line */
+            clip-path: inset(50% 0 50% 0);
+            opacity: 0;
             pointer-events: none;
-            transition: opacity 1.5s ease-in-out, visibility 1.5s !important;
         }
-        #screen > #qt-shadow-container.show-app,
-        #screen > [id^="qt-shadow-container"].show-app {
-            opacity: 0.75 !important;
-            visibility: visible;
+        
+        /* When TV turns on */
+        #prompter-tv-wrapper.tv-on {
+            opacity: 1;
             pointer-events: auto;
+            animation: tv-turn-on 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        
+        /* TV turn-on keyframes: horizontal line expands vertically */
+        @keyframes tv-turn-on {
+            0% {
+                clip-path: inset(50% 0 50% 0);
+                opacity: 0;
+                filter: brightness(3) saturate(0);
+            }
+            15% {
+                clip-path: inset(49% 0 49% 0);
+                opacity: 1;
+                filter: brightness(3) saturate(0);
+            }
+            30% {
+                clip-path: inset(45% 0 45% 0);
+                filter: brightness(2) saturate(0.3);
+            }
+            60% {
+                clip-path: inset(20% 0 20% 0);
+                filter: brightness(1.3) saturate(0.7);
+            }
+            100% {
+                clip-path: inset(0% 0 0% 0);
+                opacity: 1;
+                filter: brightness(1) saturate(1);
+            }
+        }
+        
+        /* Scanline glow effect during turn-on */
+        #prompter-tv-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(35, 187, 132, 0.8), 
+                rgba(58, 156, 210, 0.9), 
+                rgba(35, 187, 132, 0.8), 
+                transparent
+            );
+            transform: translateY(-50%);
+            opacity: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px 5px rgba(35, 187, 132, 0.5),
+                        0 0 40px 10px rgba(58, 156, 210, 0.3);
+        }
+        
+        #prompter-tv-wrapper.tv-on::before {
+            animation: scanline-glow 0.6s ease-out forwards;
+        }
+        
+        @keyframes scanline-glow {
+            0% {
+                opacity: 1;
+                height: 3px;
+                box-shadow: 0 0 30px 10px rgba(35, 187, 132, 0.8),
+                            0 0 60px 20px rgba(58, 156, 210, 0.5);
+            }
+            50% {
+                opacity: 0.8;
+                height: 6px;
+            }
+            100% {
+                opacity: 0;
+                height: 0px;
+            }
+        }
+        
+        /* Hide placeholder by default - shown via TV wrapper */
+        #placeholder-prompter { 
+            opacity: 0.75 !important;
+            visibility: visible !important;
+        }
+        
+        /* Improved hiding for the dynamic prompter container */
+        #qt-shadow-container,
+        [id*="qt-shadow-container"] { 
+            opacity: 0 !important; 
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s !important;
+        }
+        #qt-shadow-container.show-app,
+        [id*="qt-shadow-container"].show-app {
+            opacity: 0.75 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
         }
         
         /* Hide old tabs initially */
@@ -75,7 +173,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0 flex items-center gap-3">
-                    <img src="favicon.ico" alt="QPrompt" class="w-10 h-10 animate-pulse">
+                    <img src="/favicon.ico" alt="QPrompt" class="w-10 h-10 animate-pulse">
                     <span class="font-display font-bold text-2xl tracking-tight text-white">QPrompt</span>
                 </div>
                 
@@ -110,16 +208,16 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section class="relative min-h-screen flex items-center overflow-hidden">
         <!-- Background Elements -->
         <div class="absolute inset-0 z-0">
             <div class="absolute top-20 left-10 w-72 h-72 bg-brand-primary/20 rounded-full blur-[100px] animate-pulse"></div>
             <div class="absolute bottom-20 right-10 w-96 h-96 bg-brand-accent/20 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1s;"></div>
         </div>
 
-        <div class="container mx-auto px-4 relative z-10 grid lg:grid-cols-2 gap-12 items-center h-full">
+        <div class="container mx-auto px-4 relative z-10 grid lg:grid-cols-2 gap-12 items-center py-24 lg:py-0">
             <!-- Text Content -->
-            <div class="text-center lg:text-left space-y-8" id="hero-text">
+            <div class="text-center lg:text-left space-y-8 relative z-20" id="hero-text">
                 <h1 class="font-display font-black text-6xl md:text-8xl leading-none tracking-tighter">
                     THE ULTIMATE <br>
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent neon-text">TELEPROMPTER</span>
@@ -146,16 +244,19 @@
                          x-data="heroPrompter({ scale: 0.85, fudgeX: -250, placeholderScale: 1, placeholderX: 0, placeholderY: 0})"
                          style="margin-top: 6%;">
                         <!-- Video res: 3840x2160 -->
-                        <img src="img/video-last-frame.webp" id="last-frame" width="4224" height="2376" 
+                        <img src="/img/video-last-frame.webp" id="last-frame" width="4224" height="2376" 
                              class="origin-top-left hidden" 
                              x-bind:style="wrapperStyle">
                         <video id="top-video" width="4224" height="2376" autoplay muted playsinline 
                                class="origin-top-left" 
                                style="transition: opacity 1.5s ease-in-out; opacity: 0;"
                                x-bind:style="wrapperStyle" 
-                               src="video/website-prompter.webm" type="video/webm"></video>
-                        <img src="img/qprompt-wasm.webp" id="placeholder-prompter" class="absolute top-0 left-0 w-full opacity-0" 
-                             x-bind:style="placeholderStyle">
+                               src="/video/website-prompter.webm" type="video/webm"></video>
+                        <!-- TV Turn-On Effect Wrapper -->
+                        <div id="prompter-tv-wrapper">
+                            <img src="/img/qprompt-wasm.webp" id="placeholder-prompter" class="absolute top-0 left-0 w-full"
+                                 x-bind:style="placeholderStyle">
+                        </div>
                         <div id="qtstatus"></div>
                     </div>
                 </div>
@@ -426,7 +527,7 @@
       const status = document.querySelector('#qtstatus');
       const video = document.querySelector('#top-video');
       const placeholder = document.querySelector('#placeholder-prompter');
-      const lastFrame= document.querySelector('#last-frame');
+      const lastFrame = document.querySelector('#last-frame');
       
       window.mobile = function() {
         let check = false;
@@ -434,24 +535,49 @@
         return check;
       };
 
-      if (window.mobile()) {
+      const showVideo = () => {
+        if (!window.mobile()) {
+          video.style.opacity = 1;
+          // Placeholder stays hidden (via CSS) while video plays
+        }
+      };
+
+      // Function to show the prompter elements with TV turn-on effect
+      const showPrompterElements = () => {
+        // Show last frame as background
         lastFrame.classList.remove("hidden");
+        
+        // Get the TV wrapper and trigger the turn-on animation
+        const tvWrapper = document.querySelector('#prompter-tv-wrapper');
+        if (tvWrapper) {
+          tvWrapper.classList.add("tv-on");
+        }
+        
+        // Show the WASM app container after TV animation completes
+        setTimeout(() => {
+          const appContainer = document.querySelector('#qt-shadow-container');
+          if (appContainer) {
+            appContainer.classList.add("show-app");
+          }
+        }, 600); // Delay to sync with TV animation
+      };
+
+      if (window.mobile()) {
+        // On mobile: show static content immediately (no video)
         video.style.display = "none";
+        showPrompterElements();
       }
       else if (navigator.userAgent.search("Firefox") !== -1) {
+        // Firefox: just play video, placeholder stays hidden
         video.style.opacity = 1;
-        // lastFrame.classList.remove("hidden"); // Removed to hide initially
-        placeholder.style.opacity = 0;
       }
       else {
-        video.addEventListener("canplay", () => {
-          if (!window.mobile()) {
-            video.style.opacity = 1;
-            // lastFrame.classList.remove("hidden"); // Removed to hide initially
-            // Keep placeholder visible during video play
-            placeholder.classList.add("opacity-0");
-          }
-        })
+        // Other browsers: show video when ready
+        if (video.readyState >= 2) {
+          showVideo();
+        } else {
+          video.addEventListener("canplay", showVideo);
+        }
       }
     
       // Start Loading WASM immediately but keep it hidden
@@ -461,19 +587,10 @@
         // Fade out video 
         video.style.opacity = 0;
 
-        // When video ends, show the last frame and placeholder
+        // When video ends, show the prompter elements
         setTimeout(() => {
-          lastFrame.classList.remove("hidden");
-          placeholder.classList.remove("opacity-0");
-          placeholder.classList.add("opacity-100");
-          
-          setTimeout(() => {
-            const appContainer = document.querySelector('#qt-shadow-container');
-            if (appContainer) {
-              appContainer.classList.add("show-app");
-            }
-          }, 100);
-        }, 500); // Small delay to let the video fade out a bit first
+          showPrompterElements();
+        }, 500); // Small delay to let the video fade out first
       });
     }
 
@@ -500,29 +617,39 @@
     
     <!-- Animations Script using Motion One -->
     <script type="module">
-        const { animate, scroll, inView } = window.Motion;
+        import { animate, inView } from "https://cdn.jsdelivr.net/npm/motion@10.16.2/+esm";
         
         // Hero Text Entrance
-        animate("#hero-text", { opacity: [0, 1], transform: ["translateX(-50px)", "none"] }, { duration: 1 });
-        animate("#hero-visual", { opacity: [0, 1], transform: ["translateX(50px)", "none"] }, { duration: 1, delay: 0.2 });
+        animate("#hero-text", { 
+            opacity: [0, 1], 
+            transform: ["translateX(-50px)", "translateX(0px)"] 
+        }, { duration: 1 });
+        
+        animate("#hero-visual", { 
+            opacity: [0, 1], 
+            transform: ["translateX(50px)", "translateX(0px)"] 
+        }, { duration: 1, delay: 0.2 });
         
         // Scroll Animations
         document.querySelectorAll(".feature-card").forEach((card, index) => {
             inView(card, ({ target }) => {
-                animate(target, { opacity: [0, 1], transform: ["translateY(20px)", "none"] }, { duration: 0.5, delay: index * 0.1 });
+                animate(target, { 
+                    opacity: [0, 1], 
+                    transform: ["translateY(20px)", "translateY(0px)"] 
+                }, { duration: 0.5, delay: index * 0.1 });
             });
         });
     </script>
 
     <!-- Dependencies -->
-    <script src="js/fontawesome.min.js"></script>
+    <script src="/js/fontawesome.min.js"></script>
     <!-- Popper not strictly needed if bootstrap removed, but keeping safe -->
-    <script src="js/popper.min.js"></script> 
+    <script src="/js/popper.min.js"></script> 
     <!-- Bootstrap removed (styles replaced by Tailwind, functionality by Alpine) -->
-    <!-- <script src="js/bootstrap.min.js"></script> -->
+    <!-- <script src="/js/bootstrap.min.js"></script> -->
     
-    <script src="js/qprompt.js"></script>
-    <script type="text/javascript" src="js/qtloader.js"></script>
+    <script src="/js/qprompt.js"></script>
+    <script type="text/javascript" src="/js/qtloader.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
