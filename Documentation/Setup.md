@@ -43,6 +43,13 @@ bun run build
 
 The output will be in the `dist/` directory.
 
+## Vercel Deployment
+
+This project is configured for easy deployment on Vercel. 
+1. Push your code to GitHub/GitLab/Bitbucket.
+2. Import the project in Vercel.
+3. Vercel will automatically detect Vite and Bun, and apply the headers defined in `vercel.json`.
+
 ## Custom Static Server
 
 The project includes a custom static server (`main.js`) designed to serve the site with the correct headers for WebAssembly. This is useful for testing the production-like environment.

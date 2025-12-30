@@ -1,6 +1,10 @@
-const http = require("http");
-const fs = require('fs');
-const path = require("path");
+import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const host = '0.0.0.0';
 const port = 8000;
@@ -20,7 +24,7 @@ const mimeTypes = {
   '.wasm': 'application/wasm'
 };
 
-const publicDir = path.resolve(__dirname, 'public');
+const publicDir = path.resolve(__dirname, process.env.PUBLIC_DIR || 'public');
 
 const requestListener = function (req, res) {
   // Normalize the request path
@@ -30,7 +34,6 @@ const requestListener = function (req, res) {
   reqPath = reqPath.split('?')[0];
 
   // Resolve path and check it stays within publicDir
-  // The '.' prefix prevents absolute paths from being resolved incorrectly
   const safePath = path.resolve(publicDir, '.' + reqPath);
 
   // Critical security check: ensure resolved path is within publicDir
@@ -52,18 +55,16 @@ const requestListener = function (req, res) {
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
     res.setHeader("Content-Type", contentType);
-    res.setHeader("X-Content-Type-Options", "nosniff"); // Prevents MIME sniffing attacks
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin"); // WASM
-    res.setHeader("Cross-Origin-Embedder-Policy", "credentialless"); // WASM
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
     res.writeHead(200);
 
     // Stream file instead of loading into memory
-    // Critical for large files - won't consume all memory
     const stream = fs.createReadStream(safePath);
     stream.pipe(res);
 
     stream.on('error', () => {
-      // File might be deleted between stat() and createReadStream()
       res.writeHead(500, { 'X-Content-Type-Options': 'nosniff' });
       res.end('Server error');
     });
