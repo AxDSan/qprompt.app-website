@@ -4,7 +4,56 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>QPrompt Teleprompter</title>
+    <title>QPrompt Teleprompter - Professional & Open Source</title>
+    <meta name="description" content="QPrompt is a professional-grade, open-source teleprompter software designed for creators. Experience high performance, ease of use, and smooth prompting on any device." />
+    <meta name="keywords" content="teleprompter, professional teleprompter, open source prompter, autocue, video production, creator tools, QPrompt, prompter app" />
+    <meta name="author" content="Javier O. Cordero Pérez" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://qprompt.app" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://qprompt.app" />
+    <meta property="og:title" content="QPrompt Teleprompter - Professional & Open Source" />
+    <meta property="og:description" content="The prompter software for creators. High performance, open source, and works across all platforms." />
+    <meta property="og:image" content="https://qprompt.app/img/qprompt-wasm.webp" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://qprompt.app" />
+    <meta property="twitter:title" content="QPrompt Teleprompter - Professional & Open Source" />
+    <meta property="twitter:description" content="The prompter software for creators. High performance, open source, and works across all platforms." />
+    <meta property="twitter:image" content="https://qprompt.app/img/qprompt-wasm.webp" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "QPrompt",
+      "operatingSystem": "Windows, macOS, Linux, Android, iOS",
+      "applicationCategory": "MultimediaApplication",
+      "description": "Professional-grade, open-source teleprompter software designed for creators.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "QPrompt",
+      "url": "https://qprompt.app",
+      "logo": "https://qprompt.app/favicon.ico",
+      "sameAs": [
+        "https://github.com/Cuperino/QPrompt",
+        "https://www.patreon.com/qpromptapp"
+      ]
+    }
+    </script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +71,8 @@
     <script>document.body.classList.remove('no-js');</script>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 top-0 transition-all duration-300 bg-brand-dark/90 backdrop-blur-md border-b border-white/10" x-data="{ mobileMenu: false }">
+    <header>
+        <nav class="fixed w-full z-50 top-0 transition-all duration-300 bg-brand-dark/90 backdrop-blur-md border-b border-white/10" x-data="{ mobileMenu: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0 flex items-center gap-3">
@@ -44,7 +94,9 @@
                 
                 <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex md:hidden">
-                    <button @click="mobileMenu = !mobileMenu" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                    <button @click="mobileMenu = !mobileMenu" 
+                            aria-label="Toggle mobile menu"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -61,10 +113,11 @@
                 <a href="#assistance" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Assistance</a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="relative min-h-screen flex items-center overflow-hidden">
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="relative min-h-screen flex items-center overflow-hidden">
         <!-- Background Elements -->
         <div class="absolute inset-0 z-0">
             <div class="absolute top-20 left-10 w-72 h-72 bg-brand-primary/20 rounded-full blur-[100px] animate-pulse"></div>
@@ -97,10 +150,11 @@
                 <div class="relative w-full max-w-5xl aspect-video">
                     <!-- The exact structure required by the logic -->
                     <div id="screen" class="z-0 relative mx-auto" 
-                         x-data="heroPrompter({ scale: 0.94, fudgeX: -13, fudgeY: 79 })"
+                         x-data="heroPrompter({ scale: 0.92, fudgeX: -37, fudgeY: 79 })"
                          style="margin-top: 6%;">
                         <!-- Video res: 3840x2160 -->
                         <img src="/img/video-last-frame.webp" id="last-frame" width="4224" height="2376" 
+                             alt="QPrompt Teleprompter Interface Preview"
                              class="origin-top-left hidden" 
                              x-bind:style="wrapperStyle">
                         <video id="top-video" width="4224" height="2376" autoplay muted playsinline 
@@ -118,6 +172,7 @@
                             <div class="tv-reveal-mask">
                                 <!-- WASM preview image shown first -->
                                 <img src="/img/qprompt-wasm.webp" id="qprompt-wasm-image" 
+                                     alt="QPrompt WebAssembly Demo Preview"
                                      class="hidden absolute top-0 left-0 w-full opacity-0 pointer-events-none" 
                                      style="transition: opacity 1.5s ease-in-out">
                                 <!-- WASM app will be injected here by qtloader -->
@@ -505,6 +560,8 @@
             </div>
         </div>
     </section>
+
+    </main>
 
     <!-- Footer -->
     <footer class="bg-brand-dark py-12 border-t border-white/10">
