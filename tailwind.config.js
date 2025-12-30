@@ -9,7 +9,7 @@ module.exports = {
       },
       colors: {
         brand: {
-          dark: '#080904', // Keeping the original dark background
+          dark: '#1c1b1f', // Updated background color
           primary: '#23bb84', // Green
           accent: '#3a9cd2', // Blue
         }
