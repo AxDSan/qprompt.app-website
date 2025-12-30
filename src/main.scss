@@ -172,6 +172,7 @@ $btn-border-radius-lg: 50rem;
 #placeholder-prompter { 
     opacity: 0.75 !important;
     visibility: visible !important;
+    border-radius: 1rem;
 }
 
 /* Improved hiding for the dynamic prompter container */
@@ -181,6 +182,8 @@ $btn-border-radius-lg: 50rem;
     visibility: hidden !important;
     pointer-events: none !important;
     transition: opacity 0.5s ease-in-out, visibility 0.5s !important;
+    border-radius: 1rem;
+    overflow: hidden;
 }
 #qt-shadow-container.show-app,
 [id*="qt-shadow-container"].show-app {
