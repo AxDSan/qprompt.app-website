@@ -110,6 +110,14 @@
                                src="/video/website-prompter.webm" type="video/webm"></video>
                         <!-- TV Turn-On Effect Wrapper -->
                         <div id="prompter-tv-wrapper" x-bind:style="placeholderStyle">
+                            <!-- Scanline that appears first -->
+                            <div class="tv-scanline"></div>
+                            <!-- Glow overlay that expands -->
+                            <div class="tv-glow"></div>
+                            <!-- Reveal mask that clips the content -->
+                            <div class="tv-reveal-mask">
+                                <!-- WASM app will be injected here by qtloader -->
+                            </div>
                         </div>
                         <div id="qtstatus"></div>
                     </div>
@@ -538,7 +546,18 @@
         // Get the TV wrapper and trigger the turn-on animation
         const tvWrapper = document.querySelector('#prompter-tv-wrapper');
         if (tvWrapper) {
+          // Phase 1: Show the scanline (horizontal bar)
           tvWrapper.classList.add("tv-on");
+          
+          // Phase 2: After scanline appears, start vertical reveal
+          setTimeout(() => {
+            tvWrapper.classList.add("tv-reveal");
+          }, 400); // Match the scanline-appear animation duration
+          
+          // Phase 3: Mark as complete after reveal finishes
+          setTimeout(() => {
+            tvWrapper.classList.add("tv-complete");
+          }, 1400); // 400ms scanline + 1000ms reveal
         }
       };
 
@@ -561,8 +580,9 @@
       }
     
       // Start Loading WASM immediately but keep it hidden
-      const tvWrapper = document.querySelector('#prompter-tv-wrapper');
-      loadWasm(tvWrapper, status);
+      // Load into the reveal mask so it gets clipped by the TV effect
+      const revealMask = document.querySelector('#prompter-tv-wrapper .tv-reveal-mask');
+      loadWasm(revealMask, status);
 
       // Parallax Background Logic
       window.addEventListener('scroll', () => {
@@ -598,9 +618,8 @@
         qtInstance = await qtLoad({
           qt: {
             onLoaded: () => {
-              console.log("WASM Loaded");
-              const appContainer = document.querySelector('#qt-shadow-container');
-              if (appContainer) appContainer.classList.add("show-app");
+              console.log("WASM Loaded and ready");
+              // WASM is now inside the reveal mask - visibility handled by TV wrapper classes
             },
             onExit: exitData => {
               status.innerHTML = 'QPrompt demo couldn\'t load' + (exitData.code !== undefined ? ` with code ${exitData.code}` : '');

@@ -40,7 +40,7 @@
             width: 100vw;
             height: calc(100vh - 130px);
         }
-        #placeholder-prompter { opacity: 0.75; }
+        #qprompt-wasm-image { opacity: 0.75; }
         /* Improved hiding for the dynamic prompter container */
         #screen > #qt-shadow-container,
         #screen > [id^="qt-shadow-container"] { 
@@ -138,7 +138,7 @@
                 <div class="relative w-full max-w-[800px] aspect-video">
                     <!-- The exact structure required by the logic -->
                     <div id="screen" class="z-0 relative mx-auto" 
-                         x-data="heroPrompter({ scale: 0.85, fudgeX: -250, placeholderScale: 1, placeholderX: 0, placeholderY: 0})"
+                         x-data="heroPrompter({ scale: 0.85, fudgeX: -250, wasmScale: 1, wasmX: 0, wasmY: 0})"
                          style="margin-top: 6%;">
                         <!-- Video res: 3840x2160 -->
                         <img src="img/video-last-frame.webp" id="last-frame" width="4224" height="2376" 
@@ -149,8 +149,8 @@
                                style="transition: opacity 1.5s ease-in-out; opacity: 0;"
                                x-bind:style="wrapperStyle" 
                                src="video/website-prompter.webm" type="video/webm"></video>
-                        <img src="img/qprompt-wasm.webp" id="placeholder-prompter" class="hidden lg:block absolute top-0 left-0 w-full opacity-0" 
-                             x-bind:style="placeholderStyle">
+                        <img src="img/qprompt-wasm.webp" id="qprompt-wasm-image" class="hidden lg:block absolute top-0 left-0 w-full opacity-0" 
+                             x-bind:style="wasmStyle">
                         <div id="qtstatus"></div>
                     </div>
                 </div>
@@ -400,10 +400,10 @@
         fudgeX: initialParams.fudgeX || 0,
         fudgeY: initialParams.fudgeY || 0,
 
-        // Placeholder controls
-        placeholderScale: initialParams.placeholderScale || 1,
-        placeholderX: initialParams.placeholderX || 0,
-        placeholderY: initialParams.placeholderY || 0,
+        // WASM preview controls
+        wasmScale: initialParams.wasmScale || 1,
+        wasmX: initialParams.wasmX || 0,
+        wasmY: initialParams.wasmY || 0,
         
         get wrapperStyle() {
           // Calculate offsets based on scale so the prompter stays centered when zooming
@@ -419,9 +419,9 @@
           };
         },
 
-        get placeholderStyle() {
+        get wasmStyle() {
           return {
-            transform: `translate(${this.placeholderX}px, ${this.placeholderY}px) scale(${this.placeholderScale})`,
+            transform: `translate(${this.wasmX}px, ${this.wasmY}px) scale(${this.wasmScale})`,
             transition: 'opacity 1.5s ease-in-out, transform 0.3s ease-out'
           };
         }
@@ -433,7 +433,7 @@
       const screen = document.querySelector('#screen');
       const status = document.querySelector('#qtstatus');
       const video = document.querySelector('#top-video');
-      const placeholder = document.querySelector('#placeholder-prompter');
+      const wasmImage = document.querySelector('#qprompt-wasm-image');
       const lastFrame= document.querySelector('#last-frame');
       
       window.mobile = function() {
@@ -449,15 +449,15 @@
       else if (navigator.userAgent.search("Firefox") !== -1) {
         video.style.opacity = 1;
         // lastFrame.classList.remove("hidden"); // Removed to hide initially
-        placeholder.style.opacity = 0;
+        if (wasmImage) wasmImage.style.opacity = 0;
       }
       else {
         video.addEventListener("canplay", () => {
           if (!window.mobile()) {
             video.style.opacity = 1;
             // lastFrame.classList.remove("hidden"); // Removed to hide initially
-            // Keep placeholder visible during video play
-            placeholder.classList.add("opacity-0");
+            // Keep WASM preview visible during video play
+            wasmImage?.classList.add("opacity-0");
           }
         })
       }
@@ -469,11 +469,11 @@
         // Fade out video 
         video.style.opacity = 0;
 
-        // When video ends, show the last frame and placeholder
+        // When video ends, show the last frame and WASM preview
         setTimeout(() => {
           lastFrame.classList.remove("hidden");
-          placeholder.classList.remove("opacity-0");
-          placeholder.classList.add("opacity-100");
+          wasmImage?.classList.remove("opacity-0");
+          wasmImage?.classList.add("opacity-100");
           
           setTimeout(() => {
             const appContainer = document.querySelector('#qt-shadow-container');

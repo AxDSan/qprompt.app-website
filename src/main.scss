@@ -77,6 +77,13 @@ $btn-border-radius-lg: 50rem;
 }
 
 /* ===== TV TURN-ON EFFECT ===== */
+/* 
+ * This creates a CRT TV turn-on effect:
+ * Phase 1: Horizontal scanline appears (bright glow)
+ * Phase 2: Vertical expansion from center reveals the WASM app
+ * Phase 3: Glow fades as full image is revealed
+ */
+
 /* Container for the TV effect - clips the content during animation */
 #prompter-tv-wrapper {
     position: absolute;
@@ -85,111 +92,215 @@ $btn-border-radius-lg: 50rem;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    /* Start as a thin horizontal line */
-    clip-path: inset(50% 0 50% 0);
+    border-radius: 0.5rem;
+    /* Start completely hidden */
     opacity: 0;
     pointer-events: none;
 }
 
-/* When TV turns on */
-#prompter-tv-wrapper.tv-on {
-    opacity: 1;
-    pointer-events: auto;
-    animation: tv-turn-on 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+/* The reveal mask - clips content vertically from center */
+#prompter-tv-wrapper .tv-reveal-mask {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    /* Start as thin horizontal line at center */
+    clip-path: inset(50% 0 50% 0);
 }
 
-/* TV turn-on keyframes: horizontal line expands vertically */
-@keyframes tv-turn-on {
-    0% {
-        clip-path: inset(50% 0 50% 0);
-        opacity: 0;
-        filter: brightness(3) saturate(0);
-    }
-    15% {
-        clip-path: inset(49% 0 49% 0);
-        opacity: 1;
-        filter: brightness(3) saturate(0);
-    }
-    30% {
-        clip-path: inset(45% 0 45% 0);
-        filter: brightness(2) saturate(0.3);
-    }
-    60% {
-        clip-path: inset(20% 0 20% 0);
-        filter: brightness(1.3) saturate(0.7);
-    }
-    100% {
-        clip-path: inset(0% 0 0% 0);
-        opacity: 1;
-        filter: brightness(1) saturate(1);
-    }
-}
-
-/* Scanline glow effect during turn-on */
-#prompter-tv-wrapper::before {
-    content: '';
+/* The scanline bar that appears first */
+#prompter-tv-wrapper .tv-scanline {
     position: absolute;
     top: 50%;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(35, 187, 132, 0.8), 
-        rgba(58, 156, 210, 0.9), 
-        rgba(35, 187, 132, 0.8), 
-        transparent
-    );
+    height: 4px;
     transform: translateY(-50%);
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(35, 187, 132, 0.4) 10%,
+        rgba(58, 156, 210, 0.9) 30%,
+        rgba(255, 255, 255, 1) 50%,
+        rgba(58, 156, 210, 0.9) 70%,
+        rgba(35, 187, 132, 0.4) 90%,
+        transparent 100%
+    );
     opacity: 0;
     z-index: 100;
-    box-shadow: 0 0 20px 5px rgba(35, 187, 132, 0.5),
-                0 0 40px 10px rgba(58, 156, 210, 0.3);
+    box-shadow: 
+        0 0 10px 2px rgba(255, 255, 255, 0.8),
+        0 0 30px 8px rgba(35, 187, 132, 0.6),
+        0 0 60px 15px rgba(58, 156, 210, 0.4);
+    pointer-events: none;
 }
 
-#prompter-tv-wrapper.tv-on::before {
-    animation: scanline-glow 0.6s ease-out forwards;
+/* CRT glow overlay that expands with the reveal */
+#prompter-tv-wrapper .tv-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    opacity: 0;
+    z-index: 50;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 100% 0% at 50% 50%,
+        rgba(35, 187, 132, 0.3) 0%,
+        rgba(58, 156, 210, 0.2) 40%,
+        transparent 70%
+    );
 }
 
-@keyframes scanline-glow {
+/* ===== ANIMATION STATES ===== */
+
+/* Phase 1: Scanline appears (tv-on class added) */
+#prompter-tv-wrapper.tv-on {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#prompter-tv-wrapper.tv-on .tv-scanline {
+    animation: scanline-appear 0.4s ease-out forwards;
+}
+
+@keyframes scanline-appear {
     0% {
-        opacity: 1;
-        height: 3px;
-        box-shadow: 0 0 30px 10px rgba(35, 187, 132, 0.8),
-                    0 0 60px 20px rgba(58, 156, 210, 0.5);
+        opacity: 0;
+        transform: translateY(-50%) scaleX(0);
     }
     50% {
+        opacity: 1;
+        transform: translateY(-50%) scaleX(0.6);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(-50%) scaleX(1);
+    }
+}
+
+/* Phase 2: Vertical reveal (tv-reveal class added after scanline) */
+#prompter-tv-wrapper.tv-reveal .tv-reveal-mask {
+    animation: vertical-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#prompter-tv-wrapper.tv-reveal .tv-scanline {
+    animation: scanline-fade 0.8s ease-out 0.2s forwards;
+}
+
+#prompter-tv-wrapper.tv-reveal .tv-glow {
+    animation: glow-expand 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Vertical reveal - expands from center line to full height */
+@keyframes vertical-reveal {
+    0% {
+        clip-path: inset(49.5% 0 49.5% 0);
+        filter: brightness(2.5) saturate(0);
+    }
+    15% {
+        clip-path: inset(45% 0 45% 0);
+        filter: brightness(2) saturate(0.2);
+    }
+    40% {
+        clip-path: inset(30% 0 30% 0);
+        filter: brightness(1.5) saturate(0.5);
+    }
+    70% {
+        clip-path: inset(10% 0 10% 0);
+        filter: brightness(1.2) saturate(0.8);
+    }
+    100% {
+        clip-path: inset(0% 0 0% 0);
+        filter: brightness(1) saturate(1);
+    }
+}
+
+/* Scanline fades as reveal completes */
+@keyframes scanline-fade {
+    0% {
+        opacity: 1;
+        height: 4px;
+        box-shadow: 
+            0 0 10px 2px rgba(255, 255, 255, 0.8),
+            0 0 30px 8px rgba(35, 187, 132, 0.6),
+            0 0 60px 15px rgba(58, 156, 210, 0.4);
+    }
+    30% {
         opacity: 0.8;
-        height: 6px;
+        height: 8px;
     }
     100% {
         opacity: 0;
         height: 0px;
+        box-shadow: none;
     }
 }
 
-/* Hide placeholder by default - shown via TV wrapper */
-#placeholder-prompter { 
-    opacity: 0.75 !important;
-    visibility: visible !important;
-    border-radius: 1rem;
+/* Glow expands vertically with the reveal */
+@keyframes glow-expand {
+    0% {
+        opacity: 1;
+        background: radial-gradient(
+            ellipse 100% 5% at 50% 50%,
+            rgba(255, 255, 255, 0.4) 0%,
+            rgba(35, 187, 132, 0.3) 30%,
+            transparent 60%
+        );
+    }
+    30% {
+        opacity: 0.8;
+        background: radial-gradient(
+            ellipse 100% 30% at 50% 50%,
+            rgba(35, 187, 132, 0.2) 0%,
+            rgba(58, 156, 210, 0.15) 50%,
+            transparent 80%
+        );
+    }
+    60% {
+        opacity: 0.5;
+        background: radial-gradient(
+            ellipse 100% 60% at 50% 50%,
+            rgba(35, 187, 132, 0.1) 0%,
+            transparent 70%
+        );
+    }
+    100% {
+        opacity: 0;
+        background: transparent;
+    }
 }
 
-/* Improved hiding for the dynamic prompter container */
+/* Final state - clean revealed app */
+#prompter-tv-wrapper.tv-complete .tv-reveal-mask {
+    clip-path: inset(0% 0 0% 0);
+    filter: none;
+}
+
+#prompter-tv-wrapper.tv-complete .tv-scanline,
+#prompter-tv-wrapper.tv-complete .tv-glow {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* The WASM app container - inside the reveal mask */
 #qt-shadow-container,
 [id*="qt-shadow-container"] { 
-    opacity: 0 !important; 
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transition: opacity 0.5s ease-in-out, visibility 0.5s !important;
-    border-radius: 1rem;
-    overflow: hidden;
-}
-#qt-shadow-container.show-app,
-[id*="qt-shadow-container"].show-app {
-    opacity: 0.75 !important;
+    opacity: 0.85 !important;
     visibility: visible !important;
     pointer-events: auto !important;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    /* Slight CRT screen curve effect */
+    box-shadow: 
+        inset 0 0 30px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(35, 187, 132, 0.15),
+        0 0 40px rgba(58, 156, 210, 0.1);
+}
+
+/* Before WASM is loaded, hide it */
+#prompter-tv-wrapper:not(.tv-on) #qt-shadow-container,
+#prompter-tv-wrapper:not(.tv-on) [id*="qt-shadow-container"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 /* Hide old tabs initially */
@@ -217,4 +328,5 @@ $btn-border-radius-lg: 50rem;
 .btn-beast {
     border-width: 2px !important;
 }
+
 
