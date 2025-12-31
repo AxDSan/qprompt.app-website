@@ -150,41 +150,6 @@
                 </div>
             </div>
 
-            <div class="flex justify-center mt-6 px-4 w-full">
-                <div id="video-size-tuner" class="w-full max-w-3xl rounded-2xl border border-white/15 bg-black/40 p-5 text-xs text-white backdrop-blur-3xl shadow-2xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-[11px] uppercase tracking-[0.3em] text-brand-primary font-semibold">Video Tuner</p>
-                            <p class="text-[10px] text-gray-300">Drag sliders to preview different hero video sizes.</p>
-                        </div>
-                        <span class="text-[11px] text-gray-400">Live</span>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="space-y-1">
-                            <label for="video-scale-slider" class="flex justify-between text-gray-300 text-[11px] font-semibold uppercase">
-                                Scale
-                                <span id="video-scale-value" class="text-brand-primary text-[11px]">100%</span>
-                            </label>
-                            <input id="video-scale-slider" type="range" min="60" max="120" value="100" step="1" class="w-full accent-brand-primary">
-                        </div>
-                        <div class="space-y-1">
-                            <label for="screen-width-slider" class="flex justify-between text-gray-300 text-[11px] font-semibold uppercase">
-                                Max Width
-                                <span id="screen-width-value" class="text-brand-primary text-[11px]">1016px</span>
-                            </label>
-                            <input id="screen-width-slider" type="range" min="500" max="1400" value="1016" step="10" class="w-full accent-brand-primary">
-                        </div>
-                        <div class="space-y-1">
-                            <label for="screen-height-slider" class="flex justify-between text-gray-300 text-[11px] font-semibold uppercase">
-                                Max Height
-                                <span id="screen-height-value" class="text-brand-primary text-[11px]">583px</span>
-                            </label>
-                            <input id="screen-height-slider" type="range" min="400" max="900" value="583" step="10" class="w-full accent-brand-primary">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="relative block text-center">
                 <a href="#features" class="inline-block my-4 px-6 py-2 border-2 border-white/30 text-white rounded-lg hover:bg-white/10 transition-all align-middle">
                     &darr; Why use QPrompt &darr;
@@ -199,7 +164,7 @@
             <div class="absolute inset-0 bg-brand-dark/80 z-0"></div>
             
             <div class="container mx-auto px-4 relative z-10" x-data="{ ver: '1.1.6', platform: 'all' }">
-                <h2 class="font-dyuthi text-4xl text-center mb-12 uppercase">DOWNLOAD <span class="text-brand-accent">NOW</span></h2>
+                <!-- <h2 class="font-dyuthi text-4xl text-center mb-12 uppercase">DOWNLOAD <span class="text-brand-accent">NOW</span></h2> -->
                 
                 <div class="flex flex-col md:flex-row justify-center items-center gap-8 mb-16">
                     <a href="https://sourceforge.net/projects/qprompt/files/latest/download" 
@@ -285,12 +250,6 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="p-3 bg-red-500/10 border-2 border-red-500/20 rounded-lg">
-                                <p class="text-[10px] text-red-200 leading-tight">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i> If the app appears damaged, run: <br>
-                                    <code class="bg-black/40 px-1 rounded mt-1 inline-block">sudo xattr -cr /Applications/QPrompt.app</code>
-                                </p>
-                            </div>
                         </div>
                     </div>
 
@@ -306,7 +265,6 @@
                                     </a>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-gray-500 text-center italic">Includes fix for Windows 10 22H2 bug.</p>
                         </div>
                     </div>
                 </div>
@@ -582,6 +540,13 @@
       lastFrame: null
     };
 
+    // Video configuration - Set these to your preferred fixed values
+    const VIDEO_CONFIG = {
+      scale: 0.88,      // 1.0 = 100%
+      width: 1016,     // px
+      height: 583      // px
+    };
+
     function showPrompterApp() {
       if (revealTriggered) return;
       revealTriggered = true;
@@ -611,71 +576,51 @@
       }
     }
 
-    function setupVideoSizeControls() {
-      const scaleSlider = document.querySelector('#video-scale-slider');
-      const widthSlider = document.querySelector('#screen-width-slider');
-      const heightSlider = document.querySelector('#screen-height-slider');
-      const scaleDisplay = document.querySelector('#video-scale-value');
-      const widthDisplay = document.querySelector('#screen-width-value');
-      const heightDisplay = document.querySelector('#screen-height-value');
-
-      if (!scaleSlider || !widthSlider || !heightSlider) {
-        return;
-      }
-
+    function applyFixedVideoSize() {
       // Monitor center in original video pixels (at scale 1.0)
-      // These coordinates are derived from the default values: 
-      // left: -1520px, top: -503px for a screen of 1016x583
       const Mcx = 1520 + 1016 / 2;
       const Mcy = 503 + 583 / 2;
 
-      const updateLayout = () => {
-        const scale = Number(scaleSlider.value) / 100;
-        const sw = Number(widthSlider.value);
-        const sh = Number(heightSlider.value);
-        
-        // Update screen dimensions
-        if (dom.screen) {
-          dom.screen.style.maxWidth = `${sw}px`;
-          dom.screen.style.maxHeight = `${sh}px`;
+      const scale = VIDEO_CONFIG.scale;
+      const sw = VIDEO_CONFIG.width;
+      const sh = VIDEO_CONFIG.height;
+      
+      // Update screen dimensions
+      if (dom.screen) {
+        dom.screen.style.maxWidth = `${sw}px`;
+        dom.screen.style.maxHeight = `${sh}px`;
+      }
+      
+      // Update video and last frame to stay centered on the monitor
+      const videoTop = sh / 2 - Mcy * scale;
+      const videoLeft = sw / 2 - Mcx * scale;
+      
+      [dom.video, dom.lastFrame].forEach(el => {
+        if (el) {
+          el.style.transformOrigin = 'top left';
+          el.style.transform = `scale(${scale})`;
+          el.style.top = `${videoTop}px`;
+          el.style.left = `${videoLeft}px`;
         }
-        
-        // Update video and last frame to stay centered on the monitor
-        const videoTop = sh / 2 - Mcy * scale;
-        const videoLeft = sw / 2 - Mcx * scale;
-        
-        [dom.video, dom.lastFrame].forEach(el => {
-          if (el) {
-            el.style.transformOrigin = 'top left';
-            el.style.transform = `scale(${scale})`;
-            el.style.top = `${videoTop}px`;
-            el.style.left = `${videoLeft}px`;
-          }
-        });
+      });
 
-        // Update WASM elements and placeholder - re-query as they are added dynamically
+      const updateDynamicElements = () => {
         const qtElements = document.querySelectorAll('#qt-shadow-container, [id*="qt-shadow-container"], #qt-window-canvas');
         [...qtElements, dom.placeholder].forEach(el => {
           if (el) {
-            // Use transform scale to match the video scaling
-            // We scale from center because the video's monitor is kept centered in #screen
             el.style.transformOrigin = 'center';
             el.style.transform = `scale(${scale})`;
           }
         });
-
-        // Update labels
-        if (scaleDisplay) scaleDisplay.textContent = `${scaleSlider.value}%`;
-        if (widthDisplay) widthDisplay.textContent = `${sw}px`;
-        if (heightDisplay) heightDisplay.textContent = `${sh}px`;
       };
 
-      scaleSlider.addEventListener('input', updateLayout);
-      widthSlider.addEventListener('input', updateLayout);
-      heightSlider.addEventListener('input', updateLayout);
-
-      // Initial layout
-      updateLayout();
+      updateDynamicElements();
+      
+      // Use an observer to handle elements added later by WASM loader
+      const observer = new MutationObserver(updateDynamicElements);
+      if (dom.screen) {
+        observer.observe(dom.screen, { childList: true, subtree: true });
+      }
     }
 
     function loadWasm(screen, status) {
@@ -733,7 +678,7 @@
       // Never show placeholder imagery during initial load / while the video plays.
       if (dom.placeholder) dom.placeholder.style.opacity = "0";
       if (dom.lastFrame) dom.lastFrame.hidden = true;
-      setupVideoSizeControls();
+      applyFixedVideoSize();
       
       window.mobile = function() {
         let check = false;
