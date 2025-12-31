@@ -1,7 +1,7 @@
 <footer class="border-t border-border/40 py-6 md:py-0 bg-background">
     <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row mx-auto px-4">
-        <p class="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            &copy; 2026 Javier O. Cordero Pérez.
+        <p class="text-center text-sm leading-loose text-muted-foreground md:text-left" x-data="{ currentYear: new Date().getFullYear() }">
+            &copy; <span x-text="currentYear">2026</span> Javier O. Cordero Pérez.
         </p>
         <div class="flex items-center space-x-4">
             <a href="https://www.facebook.com/qpromptapp" class="text-muted-foreground hover:text-foreground"><i class="fa-brands fa-facebook"></i></a>
