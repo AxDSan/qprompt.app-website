@@ -32,6 +32,7 @@ $btn-border-radius-lg: 50rem;
        url('/fonts/Dyuthi.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Custom scrollbar */
@@ -110,7 +111,7 @@ $btn-border-radius-lg: 50rem;
 
 /* Fonts for Logo and Branding */
 .font-dyuthi {
-    font-family: 'Dyuthi', serif !important;
+    font-family: 'Dyuthi', Arial, sans-serif !important;
     letter-spacing: 0.05em; /* Increased spacing further to prevent clumping */
     line-height: 1.4 !important; /* Ensure readable line height for this decorative font */
 }
